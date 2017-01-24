@@ -215,7 +215,7 @@ void ac_automata_finalize (AC_AUTOMATA_t * thiz)
  *  0: success; continue searching; call-back sent me a 0 value
  *  1: success; stop searching; call-back sent me a non-0 value
 ******************************************************************************/
-int ac_automata_search (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param)
+int ac_automata_search_cb (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param, MATCH_CALBACK_f callback)
 {
 	unsigned long position;
 	AC_NODE_t * current;
@@ -230,6 +230,9 @@ int ac_automata_search (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param)
 	position = 0;
 	current = thiz->current_node;
 
+	if(callback == NULL){
+		callback = thiz->match_callback;
+	}
 	/* This is the main search loop.
 	 * it must be keep as lightweight as possible. */
 	while (position < txt->length)
@@ -259,8 +262,9 @@ int ac_automata_search (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param)
 			thiz->match.position = position + thiz->base_position;
 			thiz->match.match_num = current->matched_patterns_num;
 			thiz->match.patterns = current->matched_patterns;
+
 			/* we found a match! do call-back */
-			if (thiz->match_callback(&thiz->match, param))
+			if (callback(&thiz->match, param))
 				return 1;
 		}
 	}
@@ -271,6 +275,25 @@ int ac_automata_search (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param)
 	return 0;
 }
 
+/******************************************************************************
+ * FUNCTION: ac_automata_search
+ * Search in the input text using the given automata. on match event it will
+ * call the call-back function. and the call-back function in turn after doing
+ * its job, will return an integer value to ac_automata_search(). 0 value means
+ * continue search, and non-0 value means stop search and return to the caller.
+ * PARAMS:
+ * AC_AUTOMATA_t * thiz: the pointer to the automata
+ * AC_TEXT_t * txt: the input text that must be searched
+ * void * param: this parameter will be send to call-back function. it is
+ * useful for sending parameter to call-back function from caller function.
+ * RETURN VALUE:
+ * -1: failed call; automata is not finalized
+ *  0: success; continue searching; call-back sent me a 0 value
+ *  1: success; stop searching; call-back sent me a non-0 value
+******************************************************************************/
+int ac_automata_search (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param){
+	return ac_automata_search_cb (thiz, txt, param, NULL);
+}
 /******************************************************************************
  * FUNCTION: ac_automata_reset
  * reset the automata and make it ready for doing new search on a new text.
