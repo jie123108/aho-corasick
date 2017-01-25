@@ -63,7 +63,7 @@ inline int ac_automata_get_char_len(unsigned char c){
 	return m_glen_table_utf8[c];
 }
 
-int ac_automata_get_char_cnt(AC_ALPHABET_t* str, int len){
+int ac_automata_get_char_cnt(char* str, int len){
 	int i=0;
 	int size = 1;
 	int cnt = 0;	
@@ -74,7 +74,7 @@ int ac_automata_get_char_cnt(AC_ALPHABET_t* str, int len){
 	return cnt;
 }
 
-inline AC_ALPHABET_UTF8_T ac_automata_get_char_value(AC_ALPHABET_t* str, int len){
+inline AC_ALPHABET_UTF8_T ac_automata_get_char_value(const char* str, int len){
 	AC_ALPHABET_UTF8_T v = 0;
 	switch(len){
 	case 1:
@@ -116,6 +116,13 @@ AC_AUTOMATA_t * ac_automata_init (MATCH_CALBACK_f mc)
 	thiz->total_patterns = 0;
 	thiz->automata_open = 1;
 	return thiz;
+}
+
+AC_ERROR_t ac_automata_add_simple (AC_AUTOMATA_t * thiz, const char* patt, int length){
+	AC_PATTERN_t pattern;
+	pattern.length = length;
+	pattern.astring = (char*)patt;
+	return ac_automata_add(thiz, &pattern);
 }
 
 /******************************************************************************
@@ -215,7 +222,7 @@ void ac_automata_finalize (AC_AUTOMATA_t * thiz)
  *  0: success; continue searching; call-back sent me a 0 value
  *  1: success; stop searching; call-back sent me a non-0 value
 ******************************************************************************/
-int ac_automata_search_cb (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param, MATCH_CALBACK_f callback)
+int ac_automata_search_cb (AC_AUTOMATA_t * thiz, const char* text, int text_len, MATCH_CALBACK_f callback, void * param)
 {
 	unsigned long position;
 	AC_NODE_t * current;
@@ -235,12 +242,12 @@ int ac_automata_search_cb (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param, 
 	}
 	/* This is the main search loop.
 	 * it must be keep as lightweight as possible. */
-	while (position < txt->length)
+	while (position < text_len)
 	{
-		//printf("c:%c\n", txt->astring[position]);
+		//printf("c:%c\n", text[position]);
 		
-		len = ac_automata_get_char_len(txt->astring[position]);
-		alpha = ac_automata_get_char_value(&txt->astring[position], len);
+		len = ac_automata_get_char_len(text[position]);
+		alpha = ac_automata_get_char_value(&text[position], len);
 		
 		if(!(next = node_findbs_next(current, alpha)))
 		{
@@ -292,7 +299,7 @@ int ac_automata_search_cb (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param, 
  *  1: success; stop searching; call-back sent me a non-0 value
 ******************************************************************************/
 int ac_automata_search (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param){
-	return ac_automata_search_cb (thiz, txt, param, NULL);
+	return ac_automata_search_cb (thiz, txt->astring, txt->length, NULL, param);
 }
 /******************************************************************************
  * FUNCTION: ac_automata_reset

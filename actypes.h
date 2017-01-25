@@ -21,18 +21,6 @@
 #ifndef _AC_TYPES_H_
 #define _AC_TYPES_H_
 
-/* AC_ALPHABET_t:
- * defines the alphabet type.
- * Actually defining AC_ALPHABET_t as a char will work, but sometimes we deal
- * with streams of other (bigger) types e.g. integers, specific enum, objects.
- * Although they consists of string of bytes (chars), but using their specific
- * types for AC_ALPHABET_t will lead to a better performance. so instead of
- * dealing with strings of chars, we assume dealing with strings of
- * AC_ALPHABET_t and leave it optional for other developers to define their
- * own alphabets.
-**/
-typedef char AC_ALPHABET_t;
-
 
 typedef int  AC_ALPHABET_UTF8_T;
 
@@ -53,7 +41,7 @@ typedef union {
 /* AC_PATTERN_t:
  * This is the pattern type that must be fed into AC automata.
  * the 'astring' field is not null-terminated, due to it can contain zero
- * value bytes. the 'length' field determines the number of AC_ALPHABET_t it
+ * value bytes. the 'length' field determines the number of char it
  * carries. the 'representative' field is described in AC_REP_t. despite
  * 'astring', 'representative' can have duplicate values for different given
  * AC_PATTERN_t. it is an optional field and you can just fill it with 0.
@@ -64,7 +52,7 @@ typedef union {
 **/
 typedef struct
 {
-	AC_ALPHABET_t * astring; /* String of alphabets */
+	char * astring; /* String of alphabets */
 	unsigned int length; /* Length of pattern */
 	//AC_REP_t rep; /* Representative string (optional) */
 } AC_PATTERN_t;
@@ -76,7 +64,7 @@ typedef struct
 **/
 typedef struct
 {
-	AC_ALPHABET_t * astring; /* String of alphabets */
+	char * astring; /* String of alphabets */
 	unsigned int length; /* Length of string */
 } AC_TEXT_t;
 
