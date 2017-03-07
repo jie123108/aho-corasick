@@ -57,7 +57,6 @@ typedef struct
 
 } AC_AUTOMATA_t;
 
-int 		ac_automata_get_char_len(unsigned char c);
 int 		ac_automata_get_char_cnt(char* str, int len);
 AC_AUTOMATA_t * ac_automata_init     (MATCH_CALBACK_f mc);
 AC_ERROR_t      ac_automata_add      (AC_AUTOMATA_t * thiz, AC_PATTERN_t * str);

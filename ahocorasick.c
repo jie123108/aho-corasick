@@ -25,6 +25,12 @@
 
 #include "ahocorasick.h"
 
+#ifdef __APPLE__
+#define EXPORT __attribute__((visibility("default")))
+#else
+#define EXPORT
+#endif
+
 /* Allocation step for automata.all_nodes */
 #define REALLOC_CHUNK_ALLNODES 200
 
@@ -59,7 +65,7 @@ static unsigned char m_glen_table_utf8[] =
 };
 
 
-inline int ac_automata_get_char_len(unsigned char c){
+static int ac_automata_get_char_len(unsigned char c){
 	return m_glen_table_utf8[c];
 }
 
@@ -74,7 +80,7 @@ int ac_automata_get_char_cnt(char* str, int len){
 	return cnt;
 }
 
-inline AC_ALPHABET_UTF8_T ac_automata_get_char_value(const char* str, int len){
+static AC_ALPHABET_UTF8_T ac_automata_get_char_value(const char* str, int len){
 	AC_ALPHABET_UTF8_T v = 0;
 	switch(len){
 	case 1:
@@ -103,7 +109,7 @@ inline AC_ALPHABET_UTF8_T ac_automata_get_char_value(const char* str, int len){
  * MATCH_CALBACK mc: call-back function
  * the call-back function will be used to reach the caller on match occurrence
 ******************************************************************************/
-AC_AUTOMATA_t * ac_automata_init (MATCH_CALBACK_f mc)
+EXPORT AC_AUTOMATA_t * ac_automata_init (MATCH_CALBACK_f mc)
 {
 	AC_AUTOMATA_t * thiz = (AC_AUTOMATA_t *)malloc(sizeof(AC_AUTOMATA_t));
 	memset (thiz, 0, sizeof(AC_AUTOMATA_t));
@@ -118,7 +124,7 @@ AC_AUTOMATA_t * ac_automata_init (MATCH_CALBACK_f mc)
 	return thiz;
 }
 
-AC_ERROR_t ac_automata_add_simple (AC_AUTOMATA_t * thiz, const char* patt, int length){
+EXPORT AC_ERROR_t ac_automata_add_simple (AC_AUTOMATA_t * thiz, const char* patt, int length){
 	AC_PATTERN_t pattern;
 	pattern.length = length;
 	pattern.astring = (char*)patt;
@@ -134,7 +140,7 @@ AC_ERROR_t ac_automata_add_simple (AC_AUTOMATA_t * thiz, const char* patt, int l
  * RETUERN VALUE: AC_ERROR_t
  * the return value indicates the success or failure of adding action
 ******************************************************************************/
-AC_ERROR_t ac_automata_add (AC_AUTOMATA_t * thiz, AC_PATTERN_t * patt)
+EXPORT AC_ERROR_t ac_automata_add (AC_AUTOMATA_t * thiz, AC_PATTERN_t * patt)
 {
 	unsigned int i;
 	int len = 1;
@@ -189,7 +195,7 @@ AC_ERROR_t ac_automata_add (AC_AUTOMATA_t * thiz, AC_PATTERN_t * patt)
  * PARAMS:
  * AC_AUTOMATA_t * thiz: the pointer to the automata
 ******************************************************************************/
-void ac_automata_finalize (AC_AUTOMATA_t * thiz)
+EXPORT void ac_automata_finalize (AC_AUTOMATA_t * thiz)
 {
 	unsigned int i;
 	AC_ALPHABET_UTF8_T alphas[AC_PATTRN_MAX_LENGTH];
@@ -222,7 +228,7 @@ void ac_automata_finalize (AC_AUTOMATA_t * thiz)
  *  0: success; continue searching; call-back sent me a 0 value
  *  1: success; stop searching; call-back sent me a non-0 value
 ******************************************************************************/
-int ac_automata_search_cb (AC_AUTOMATA_t * thiz, const char* text, int text_len, MATCH_CALBACK_f callback, void * param)
+EXPORT int ac_automata_search_cb (AC_AUTOMATA_t * thiz, const char* text, int text_len, MATCH_CALBACK_f callback, void * param)
 {
 	unsigned long position;
 	AC_NODE_t * current;
@@ -298,7 +304,7 @@ int ac_automata_search_cb (AC_AUTOMATA_t * thiz, const char* text, int text_len,
  *  0: success; continue searching; call-back sent me a 0 value
  *  1: success; stop searching; call-back sent me a non-0 value
 ******************************************************************************/
-int ac_automata_search (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param){
+EXPORT int ac_automata_search (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param){
 	return ac_automata_search_cb (thiz, txt->astring, txt->length, NULL, param);
 }
 /******************************************************************************
@@ -309,7 +315,7 @@ int ac_automata_search (AC_AUTOMATA_t * thiz, AC_TEXT_t * txt, void * param){
  * PARAMS:
  * AC_AUTOMATA_t * thiz: the pointer to the automata
 ******************************************************************************/
-void ac_automata_reset (AC_AUTOMATA_t * thiz)
+EXPORT void ac_automata_reset (AC_AUTOMATA_t * thiz)
 {
 	thiz->current_node = thiz->root;
 	thiz->base_position = 0;
@@ -321,7 +327,7 @@ void ac_automata_reset (AC_AUTOMATA_t * thiz)
  * PARAMS:
  * AC_AUTOMATA_t * thiz: the pointer to the automata
 ******************************************************************************/
-void ac_automata_release (AC_AUTOMATA_t * thiz)
+EXPORT void ac_automata_release (AC_AUTOMATA_t * thiz)
 {
 	unsigned int i;
 	AC_NODE_t * n;
@@ -343,7 +349,7 @@ void ac_automata_release (AC_AUTOMATA_t * thiz)
  * AC_AUTOMATA_t * thiz: the pointer to the automata
  * char repcast: 'n': print AC_REP_t as number, 's': print AC_REP_t as string
 ******************************************************************************/
-void ac_automata_display (AC_AUTOMATA_t * thiz, char repcast)
+EXPORT void ac_automata_display (AC_AUTOMATA_t * thiz, char repcast)
 {
 	unsigned int i, j;
 	AC_NODE_t * n;

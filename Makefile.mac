@@ -1,0 +1,13 @@
+SONAME := libahocorasick.dylib
+
+CC :=clang
+SRCS := ahocorasick.c node.c
+CFLAGS := -dynamiclib -std=gnu99 -current_version 1.0 -compatibility_version 1.0 -fvisibility=hidden
+all: $(SONAME)
+
+$(SONAME): $(SRCS)
+	$(CC) $(CFLAGS) $^ -o $@
+
+
+clean:
+	rm -f $(SONAME)
